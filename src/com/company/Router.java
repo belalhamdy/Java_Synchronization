@@ -15,7 +15,7 @@ public class Router {
         online.acquire();
         queue.add(curr);
         curr.Online();
-        release.release();
+        //release.release();
     }
     void remove(Device curr) throws InterruptedException {
         //release.acquire();
