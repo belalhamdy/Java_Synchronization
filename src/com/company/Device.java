@@ -3,7 +3,7 @@ package com.company;
 import java.util.Random;
 
 public class Device extends Thread {
-    final int timeout = 4000;
+    final int timeout = 4000,maxTimeOut = 10000,minTimeOut = 3000;
     private Router router;
     public static enum Type{
         Android(0), PC(1), Tablet(2), TV(3), IPhone(4), Laptop(5),Other(6);
@@ -49,7 +49,7 @@ public class Device extends Thread {
     }
     private int getTimeOut()
     {
-        return (int)(Math.random()*((10000-3000)+1))+3000;
+        return (int)(Math.random()*((maxTimeOut-minTimeOut)+1))+minTimeOut;
     }
     @Override
     public void run()
