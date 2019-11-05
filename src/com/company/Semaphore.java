@@ -1,7 +1,7 @@
 package com.company;
 
 public class Semaphore {
-    protected int value = 0;
+    private int value;
 
     protected Semaphore() { value = 0 ; }
 

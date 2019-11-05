@@ -1,25 +1,25 @@
 package com.company;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.ArrayList;
+import java.util.List;
 //import java.util.concurrent.Semaphore;
 
 public class Router {
-    Queue<Device> queue = new LinkedList<>();
+    List<Device> queue = new ArrayList<>();
     private Semaphore release,online;
     Router (int MaxConnections)
     {
         release = new Semaphore(0);
         online = new Semaphore(MaxConnections);
     }
-    public void add (Device curr) throws InterruptedException {
+    void add(Device curr) throws InterruptedException {
         online.acquire();
         queue.add(curr);
         curr.Online();
         release.release();
     }
-    public void remove () throws InterruptedException {
+    void remove(Device curr) throws InterruptedException {
         //release.acquire();
-        queue.remove();
+        queue.remove(curr);
         online.release();
     }
 

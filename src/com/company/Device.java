@@ -45,7 +45,7 @@ public class Device extends Thread {
     }
     private void Logout () throws InterruptedException {
         System.out.println(this + " Logout");
-        router.remove();
+        router.remove(this);
     }
     private int getTimeOut()
     {
