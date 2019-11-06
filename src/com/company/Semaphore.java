@@ -3,26 +3,23 @@ package com.company;
 public class Semaphore {
     private int value;
 
-    protected Semaphore() {
-        value = 0;
-    }
+    protected Semaphore() { value = 0 ; }
 
     protected Semaphore(int initial) {
-        value = initial;
+        value = initial ;
     }
 
     public synchronized void acquire() {
-        value--;
+        value-- ;
         if (value < 0)
             try {
-                wait();
-            } catch (InterruptedException ignored) {
-            }
+                wait() ;
+            } catch (  InterruptedException ignored ){}
     }
 
     public synchronized void release() {
-        value++;
-        if (value <= 0) notify();
+        value++ ;
+        if (value <= 0) notify() ;
     }
 
 }
