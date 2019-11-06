@@ -3,61 +3,51 @@ package com.company;
 import java.util.Random;
 
 public class Device extends Thread {
-    final int timeout = 4000,maxTimeOut = 10000,minTimeOut = 3000;
+    final int maxTimeOut = 10000, minTimeOut = 3000;
+    int timeout;
     private Router router;
-    public static enum Type{
-        Android(0), PC(1), Tablet(2), TV(3), IPhone(4), Laptop(5),Other(6);
-        private int value;
-        Type(int v)
-        {
-            value = v;
-        }
-        int getTypeValue()
-        {
-            return value;
-        }
+
+    public enum Type {
+        Android, PC, Tablet, TV, IPhone, Laptop, Other
     }
+
     private final String name;
     private final Type type;
-    Device(Router router,String name, Type type)
-    {
+
+    Device(Router router, String name, Type type) {
         this.name = name;
         this.type = type;
         this.router = router;
+        this.timeout = new Random().nextInt(maxTimeOut - minTimeOut + 1) + minTimeOut;
     }
+
     @Override
-    public String toString()
-    {
-        return this.name + " - " + this.type;
+    public String toString() {
+        return this.name + "(" + this.type.name() + ") - ";
     }
-    private void Connect() throws InterruptedException {
-        System.out.println(this + " Connected");
+
+    private void Connect() {
+        System.out.println(this + " arrived");
         router.add(this);
     }
-    public void Online () throws InterruptedException {
-        System.out.println(this + " Online");
+
+    public void Online() {
+        System.out.println(this + " performs online activity");
         try {
-            Thread.sleep(getTimeOut());
+            Thread.sleep(timeout);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         Logout();
     }
-    private void Logout () throws InterruptedException {
+
+    private void Logout() {
         System.out.println(this + " Logout");
         router.remove(this);
     }
-    private int getTimeOut()
-    {
-        return (int)(Math.random()*((maxTimeOut-minTimeOut)+1))+minTimeOut;
-    }
+
     @Override
-    public void run()
-    {
-        try {
-            Connect();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    public void run() {
+        Connect();
     }
 }
