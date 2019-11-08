@@ -4,16 +4,14 @@ import java.util.List;
 public class Router {
     private List<Device> queue = new ArrayList<>();
     private Semaphore online;
-    Router (int MaxConnections)
-    {
+    Router (int MaxConnections) {
         online = new Semaphore(MaxConnections);
     }
-    void add(Device curr) {
+    void addDevice(Device curr) {
         online.acquire();
         queue.add(curr);
-        curr.Online();
     }
-    void remove(Device curr)  {
+    void removeDevice(Device curr)  {
         queue.remove(curr);
         online.release();
     }
