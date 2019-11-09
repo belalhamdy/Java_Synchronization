@@ -26,6 +26,7 @@ public class GUI {
     private JPanel pnlProgressBar;
     private JSpinner spinner1;
     private JButton btnReset;
+    private JButton btnStartSim;
 
     private Timer tmTime;
     private DefaultTableModel dtm;
@@ -114,6 +115,11 @@ public class GUI {
 
         void setValue(int v) {
             this.progressBar.setValue(v);
+        }
+        void destroy() {
+            panelArea.remove(this.panel);
+            this.panel.removeAll();
+            panelArea.revalidate();
         }
     }
 }
