@@ -19,7 +19,7 @@ public class Semaphore {
 
     public synchronized void release() {
         value++ ;
-        if (value <= 0) notify() ;
+        if (value <= 0) notify();
     }
 
 }

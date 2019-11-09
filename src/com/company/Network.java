@@ -1,8 +1,11 @@
 package com.company;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 public class Network {
+    public static GUI myGUI;
     private static Scanner in = new Scanner(System.in);
 
     public static void mainConsole(String[] args) {
@@ -20,12 +23,20 @@ public class Network {
             System.out.print(String.format("Enter device %d type: ", i));
             int t = in.nextInt();
             System.out.println();
-            Device tempDevice = new Device(router, name, Device.Type.fromInteger(t));
+            //TODO belal comment the following line and uncomment the one after it.
+            Device tempDevice = new Device(router, name, Device.Type.fromInteger(t), myGUI.addProgressBar(name));
+            //Device tempDevice = new Device(router, name, Device.Type.fromInteger(t), null);
             input[i - 1] = tempDevice;
         }
         for (int i = 0; i < devices; ++i) {
             input[i].start();
         }
 
+    }
+    public static String getTimeStampFormatted() {
+        return DateTimeFormatter.ofPattern("HH:mm:ss.SSS").format(getTimeStamp());
+    }
+    public static LocalDateTime getTimeStamp(){
+        return LocalDateTime.now();
     }
 }
