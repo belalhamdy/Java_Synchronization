@@ -15,9 +15,9 @@ public class Device extends Thread {
         static Type fromInteger(int v) {
             return Type.values()[v - 1];
         }
-        public static String[] toArray()
-        {
-            return new String[]{"Android", "PC", "Tablet","TV", "IPhone", "Laptop","Other"};
+
+        public static String[] toArray() {
+            return new String[]{"Android", "PC", "Tablet", "TV", "IPhone", "Laptop", "Other"};
         }
 
         public String toString() {
@@ -53,7 +53,9 @@ public class Device extends Thread {
     public String toString() {
         return this.name + "(" + this.type.toString() + ") " + this.timeout;
     }
+
     private void connectToRouter() {
+
         connectTimeStamp = Network.getTimeStampFormatted();
         System.out.println(this + " arrived");
         router.addDevice(this);
@@ -64,10 +66,9 @@ public class Device extends Thread {
         router.removeFromQueue(this);
         System.out.println(this + " performs online activity");
         try {
-            if (prg == null){
+            if (prg == null) {
                 Thread.sleep(timeout);
-        }
-            else {
+            } else {
                 int slept = 0;
                 while (slept < timeout && router.getAlive()) {
                     prg.setValue(slept * 100 / timeout);
@@ -95,6 +96,7 @@ public class Device extends Thread {
     @Override
     public void run() {
         connectToRouter();
+        if (!router.getAlive()) return;
         doOnlineWork();
         logout();
         Network.myGUI.log(serialize());
