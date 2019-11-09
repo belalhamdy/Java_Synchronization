@@ -1,32 +1,29 @@
 package com.company;
 
-import sun.nio.ch.Net;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.Vector;
+
+import static javax.swing.JOptionPane.showMessageDialog;
 
 public class GUI {
 
     private JPanel pnlMain;
     private JButton btnSaveLog;
-    private JList lstInQueue;
+    private JList<Device> lstInQueue;
     private JTextField txtName;
-    private JComboBox cmbType;
+    private JComboBox<String> cmbType;
     private JButton btnEnqueue;
     private JSpinner spnTime;
     private JTable tblLog;
     private JTextPane txtLog;
     private JLabel lblTime;
     private JPanel pnlProgressBar;
-    private JSpinner spinner1;
-    private JButton btnReset;
-    private JButton btnStartSim;
+    private JSpinner spnCapacity;
+    private JButton btnSimManager;
 
     private Timer tmTime;
     private DefaultTableModel dtm;
@@ -59,13 +56,73 @@ public class GUI {
         dtm = new DefaultTableModel(null, new String[]{"Name", "Type", "Arrive Time", "Start Time", "Leave Time"});
         tblLog.setModel(dtm);
 
-        //TODO for belal remove this line. This is for testing purposes.
-        btnReset.addActionListener(e -> {
+        ((SpinnerNumberModel) this.spnTime.getModel()).setMinimum(0);
+        this.spnCapacity.getModel().setValue(1);
+        ((SpinnerNumberModel) this.spnCapacity.getModel()).setMinimum(1);
 
-            this.pnlProgressBar.removeAll();
-            this.pnlProgressBar.revalidate();
-            Network.mainConsole(null);
+        cmbType.setModel(new DefaultComboBoxModel<>(Device.Type.toArray()));
+
+        btnEnqueue.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String name = txtName.getText();
+                if (name.equals("")) {
+                    showMessageDialog(null, "Name can't be empty");
+                    return;
+                }
+                if (name.length()>25){
+                    showMessageDialog(null, "Name is too large");
+                    txtName.setText("");
+                    return;
+                }
+                int type = cmbType.getSelectedIndex() + 1;
+                int time = (Integer) spnTime.getValue();
+                Network.addDevice(name, type, time);
+                updateQueue(Network.getDeviceQueue());
+            }
         });
+        btnSimManager.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(btnSimManager.getText().equals("Start Simulation")){
+                    try {
+                        startSimulation((Integer) spnCapacity.getValue());
+                    } catch (Exception ex) {
+                        showMessageDialog(null, ex.getMessage());
+                        ex.printStackTrace();
+                    }
+                }
+                else
+                {
+                    endSimulation();
+                }
+            }
+        });
+    }
+
+    public void startSimulation(int connections) throws Exception {
+        Network.startSimulation(connections);
+        btnSimManager.setText("End Simulation");
+        txtLog.setText("");
+        this.pnlProgressBar.removeAll();
+        this.pnlProgressBar.revalidate();
+        dtm = new DefaultTableModel(null, new String[]{"Name", "Type", "Arrive Time", "Start Time", "Leave Time"});
+        tblLog.setModel(dtm);
+    }
+
+    public void endSimulation() {
+        btnSimManager.setText("Start Simulation");
+        Network.clearData();
+        updateQueue(Network.getDeviceQueue());
+    }
+
+    public void updateQueue(Vector<Device> curr) {
+        if (curr != null) {
+            lstInQueue.setListData(curr);
+        } else {
+            DefaultListModel listModel = (DefaultListModel) lstInQueue.getModel();
+            listModel.removeAllElements();
+        }
     }
 
     public void log(String[] data) {
@@ -76,6 +133,7 @@ public class GUI {
     ProgressManager addProgressBar(String name) {
         return new ProgressManager(pnlProgressBar, name);
     }
+
 
     static class ProgressManager {
         private final JPanel panelArea;
@@ -116,6 +174,7 @@ public class GUI {
         void setValue(int v) {
             this.progressBar.setValue(v);
         }
+
         void destroy() {
             panelArea.remove(this.panel);
             this.panel.removeAll();

@@ -6,7 +6,7 @@ import java.util.Random;
 public class Device extends Thread {
     public static final int maxTimeout = 10000, minTimeout = 3000;
     int timeout;
-
+    public int id;
     private String connectTimeStamp, workTimeStamp, logoutTimeStamp;
 
     public enum Type {
@@ -14,6 +14,10 @@ public class Device extends Thread {
 
         static Type fromInteger(int v) {
             return Type.values()[v - 1];
+        }
+        public static String[] toArray()
+        {
+            return new String[]{"Android", "PC", "Tablet","TV", "IPhone", "Laptop","Other"};
         }
 
         public String toString() {
@@ -42,30 +46,30 @@ public class Device extends Thread {
         this.type = type;
         this.timeout = timeout;
         this.prg = prg;
+        id = Network.getId();
     }
 
     @Override
     public String toString() {
-        return this.name + "(" + this.type.toString() + ") - ";
+        return this.name + "(" + this.type.toString() + ") " + this.timeout;
     }
-
     private void connectToRouter() {
         connectTimeStamp = Network.getTimeStampFormatted();
-
         System.out.println(this + " arrived");
         router.addDevice(this);
     }
 
     private void doOnlineWork() {
         workTimeStamp = Network.getTimeStampFormatted();
-
+        router.removeFromQueue(this);
         System.out.println(this + " performs online activity");
         try {
-            if (prg == null)
+            if (prg == null){
                 Thread.sleep(timeout);
+        }
             else {
                 int slept = 0;
-                while (slept < timeout) {
+                while (slept < timeout && router.getAlive()) {
                     prg.setValue(slept * 100 / timeout);
                     Thread.sleep(20);
                     slept += 20;
