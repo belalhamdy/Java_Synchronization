@@ -11,6 +11,7 @@ public class Router {
     }
     public void interrupt()
     {
+        queue.clear();
         alive = false;
     }
     public boolean getAlive()

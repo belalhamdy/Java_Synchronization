@@ -75,8 +75,8 @@ public class Network {
     }
     public static void clearData ()
     {
+        deviceQueue.removeAllElements();
         router.interrupt();
-        deviceQueue.clear();
         inSimulation = false;
     }
     public static String getTimeStampFormatted() {
