@@ -1,12 +1,10 @@
 package com.company;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Random;
-import java.util.stream.Stream;
 
 public class Device extends Thread {
-    public int id;
+    private int id;
     private static final int maxTimeout = 10000, minTimeout = 3000;
     private int timeout;
     private String connectTimeStamp, workTimeStamp, logoutTimeStamp;
@@ -47,7 +45,7 @@ public class Device extends Thread {
         this.type = type;
         this.timeout = timeout;
         this.prg = prg;
-        id = Network.getId();
+        id = Network.getNextID();
     }
 
     @Override
@@ -56,16 +54,14 @@ public class Device extends Thread {
     }
 
     private void connectToRouter() {
-
         connectTimeStamp = Network.getTimeStampFormatted();
-        System.out.println(this + " arrived");
-        router.addDevice(this);
+        Network.myGUI.logInConsole(this + " arrived");
+        router.connectDevice(this);
     }
 
     private void doOnlineWork() {
         workTimeStamp = Network.getTimeStampFormatted();
-        router.removeFromQueue(this);
-        System.out.println(this + " performs online activity");
+        Network.myGUI.logInConsole(this + " performs online activity");
         try {
             if (prg == null) {
                 Thread.sleep(timeout);
@@ -86,21 +82,24 @@ public class Device extends Thread {
     private void logout() {
         logoutTimeStamp = Network.getTimeStampFormatted();
 
-        System.out.println(this + " Logout");
-        router.removeDevice(this);
+        Network.myGUI.logInConsole(this + " Logout");
+        router.disconnectDevice(this);
     }
 
     private String[] serialize() {
         return new String[]{name, type.toString(), connectTimeStamp, workTimeStamp, logoutTimeStamp};
     }
 
+    int getID(){
+        return id;
+    }
     @Override
     public void run() {
         connectToRouter();
         if (!router.getAlive()) return;
         doOnlineWork();
         logout();
-        Network.myGUI.log(serialize());
+        Network.myGUI.logInTable(serialize());
     }
 
     public interface ProgressKeeper {

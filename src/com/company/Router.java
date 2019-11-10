@@ -1,43 +1,46 @@
 package com.company;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class Router {
-    private List<Device> queue = new ArrayList<>();
+    private final List<Device> onlineDevices = new ArrayList<>();
     private Semaphore online;
-    private boolean alive = true;
+    private boolean alive = false;
 
     public void setMaxConnections(int MaxConnections) {
+        alive = true;
         online = new Semaphore(MaxConnections);
     }
 
-    public void interrupt() {
-        queue.clear();
+    public void forceStopWork() {
         alive = false;
+        for(Device d : onlineDevices){
+            d.interrupt();
+        }
     }
 
     public boolean getAlive() {
         return alive;
     }
 
-    void addDevice(Device curr) {
+    void connectDevice(Device curr) {
         online.acquire();
-        queue.add(curr);
+        synchronized (onlineDevices){
+            onlineDevices.add(curr);
+        }
+        Network.removeDevice(curr.getID());
     }
 
-    void removeDevice(Device curr) {
-        queue.remove(curr);
+    void disconnectDevice(Device curr) {
+        synchronized (onlineDevices) {
+            onlineDevices.remove(curr);
+        }
         online.release();
     }
-
-    void removeFromQueue(Device curr) {
-        Network.removeDevice(curr.id);
-    }
-
+/*
     List<Device> getOnlineDevices() {
-        return queue;
+        return onlineDevices;
     }
-
+*/
 }

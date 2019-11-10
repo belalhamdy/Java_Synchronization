@@ -1,8 +1,8 @@
 package com.company;
 
+import javax.swing.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Scanner;
 import java.util.Vector;
 
 public class Network {
@@ -40,8 +40,16 @@ public class Network {
     }
     */
 
-    public static void startSimulation(int connections) throws Exception {
-        if (deviceQueue.size() < 1) throw new Exception("No devices in queue");
+    public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception ignored) {
+        }
+
+        myGUI = new GUI();
+    }
+
+    public static void startSimulation(int connections) {
         inSimulation = true;
         router.setMaxConnections(connections);
         for (Device curr : deviceQueue) {
@@ -49,7 +57,13 @@ public class Network {
         }
     }
 
-    public static void addDevice(String name, int type, int timeout) {
+    public static void endSimulation() {
+        inSimulation = false;
+        deviceQueue.removeAllElements();
+        router.forceStopWork();
+    }
+
+    public synchronized static void addDevice(String name, int type, int timeout) {
         Device tempDevice;
         if (timeout > 0)
             tempDevice = new Device(router, name, Device.Type.fromInteger(type), myGUI.addProgressBar(name), timeout);
@@ -59,9 +73,9 @@ public class Network {
         if (inSimulation) tempDevice.start();
     }
 
-    public static void removeDevice(int id) {
+    public synchronized static void removeDevice(int id) {
         for (Device curr : deviceQueue) {
-            if (curr.id == id) {
+            if (curr.getID() == id) {
                 deviceQueue.remove(curr);
                 break;
             }
@@ -73,12 +87,6 @@ public class Network {
         return deviceQueue;
     }
 
-    public static void clearData() {
-        deviceQueue.removeAllElements();
-        router.interrupt();
-        inSimulation = false;
-    }
-
     public static String getTimeStampFormatted() {
         return DateTimeFormatter.ofPattern("HH:mm:ss.SSS").format(getTimeStamp());
     }
@@ -87,7 +95,7 @@ public class Network {
         return LocalDateTime.now();
     }
 
-    public static int getId() {
+    public static int getNextID() {
         return id++;
     }
 }

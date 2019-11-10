@@ -3,8 +3,6 @@ package com.company;
 public class Semaphore {
     private int value;
 
-    protected Semaphore() { value = 0 ; }
-
     protected Semaphore(int initial) {
         value = initial ;
     }

@@ -3,6 +3,10 @@ package com.company;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Vector;
 
 import static javax.swing.JOptionPane.showMessageDialog;
@@ -25,16 +29,7 @@ public class GUI {
 
     private DefaultTableModel modelTable;
 
-    public static void main(String[] args) {
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception ignored) {
-        }
-
-        Network.myGUI = new GUI();
-    }
-
-    private GUI() {
+    public GUI() {
         JFrame form = new JFrame("Network Simulation");
         form.setResizable(false);
 
@@ -66,16 +61,28 @@ public class GUI {
         //Action Listeners for buttons.
         btnEnqueue.addActionListener(e -> btnEnqueue_clicked());
         btnSimManager.addActionListener(e -> btnSimManager_clicked());
+        btnSaveLog.addActionListener(e -> btnSaveLog_clicked());
+    }
+
+    private void btnSaveLog_clicked() {
+        JFileChooser chooser = new JFileChooser();
+        int response = chooser.showSaveDialog(null);
+        if (response == JFileChooser.APPROVE_OPTION) {
+            try {
+                Writer out = new BufferedWriter(new OutputStreamWriter(
+                        new FileOutputStream(chooser.getSelectedFile()), StandardCharsets.UTF_8));
+                out.write(txtLog.getText());
+                out.close();
+                showMessageDialog(null, "Log saved successfully!");
+            } catch (Exception ex) {
+                showMessageDialog(null, ex.getLocalizedMessage());
+            }
+        }
     }
 
     private void btnSimManager_clicked() {
         if (btnSimManager.getText().equals("Start Simulation")) {
-            try {
-                startSimulation((Integer) spnCapacity.getValue());
-            } catch (Exception ex) {
-                showMessageDialog(null, ex.getMessage());
-                ex.printStackTrace();
-            }
+            startSimulation();
         } else {
             endSimulation();
         }
@@ -98,22 +105,29 @@ public class GUI {
         updateQueue(Network.getDeviceQueue());
     }
 
-    private void startSimulation(int connections) throws Exception {
+    private void startSimulation() {
+        int connections = (int) spnCapacity.getValue();
         Network.startSimulation(connections);
+
+        spnCapacity.setEnabled(false);
         btnSimManager.setText("End Simulation");
         txtLog.setText("");
-
-        this.pnlProgressBar.removeAll();
-        this.pnlProgressBar.revalidate();
 
         modelTable.getDataVector().removeAllElements();
         modelTable.fireTableDataChanged();
     }
 
     private void endSimulation() {
+        Network.endSimulation();
+
+        this.pnlProgressBar.removeAll();
+
+        spnCapacity.setEnabled(true);
         btnSimManager.setText("Start Simulation");
-        Network.clearData();
         updateQueue(Network.getDeviceQueue());
+
+        this.pnlProgressBar.revalidate();
+
     }
 
     public void updateQueue(Vector<Device> curr) {
@@ -125,7 +139,12 @@ public class GUI {
         }
     }
 
-    public void log(String[] data) {
+    public synchronized void logInConsole(String data) {
+        System.out.println(data);
+        txtLog.setText(txtLog.getText() + data + '\n');
+    }
+
+    public synchronized void logInTable(String[] data) {
         modelTable.addRow(data);
     }
 
@@ -136,43 +155,40 @@ public class GUI {
 
 
     public static class ProgressManager implements Device.ProgressKeeper {
-        private final JPanel panelArea;
-        private final JPanel panel;
         private final JProgressBar progressBar;
-        private final JLabel label;
 
         private ProgressManager(JPanel panelArea, String Title) {
-            this.panelArea = panelArea;
-            this.panel = new JPanel();
-            this.panel.setLayout(new BoxLayout(this.panel, BoxLayout.X_AXIS));
+            JPanel panel = new JPanel();
+            panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 
 
             this.progressBar = new JProgressBar(0, 100);
-            this.label = new JLabel(Title + ": ");
+            JLabel label = new JLabel(Title + ": ");
 
-            this.panel.add(this.label);
-            this.panel.add(this.progressBar);
+            panel.add(label);
+            panel.add(this.progressBar);
 
-            Dimension progressDimension = new Dimension(new Dimension(this.panelArea.getWidth(), 25));
-            Dimension panelDimension = new Dimension(new Dimension(this.panelArea.getWidth() - 10, 30));
+            Dimension progressDimension = new Dimension(new Dimension(panelArea.getWidth(), 25));
+            Dimension panelDimension = new Dimension(new Dimension(panelArea.getWidth() - 10, 30));
             Dimension labelDimension = new Dimension(100, 25);
 
-            this.label.setMinimumSize(labelDimension);
-            this.label.setMaximumSize(labelDimension);
-            this.label.setPreferredSize(labelDimension);
+            label.setMinimumSize(labelDimension);
+            label.setMaximumSize(labelDimension);
+            label.setPreferredSize(labelDimension);
 
             this.progressBar.setMaximumSize(progressDimension);
             this.progressBar.setPreferredSize(progressDimension);
 
-            this.panel.setMaximumSize(panelDimension);
-            this.panel.setPreferredSize(panelDimension);
+            panel.setMaximumSize(panelDimension);
+            panel.setPreferredSize(panelDimension);
 
-            panelArea.add(this.panel);
+            panelArea.add(panel);
             panelArea.revalidate();
         }
 
         public void setValue(int v) {
             this.progressBar.setValue(v);
+            this.progressBar.revalidate();
         }
 
         /*
