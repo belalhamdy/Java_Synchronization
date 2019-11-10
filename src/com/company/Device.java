@@ -15,6 +15,7 @@ public class Device extends Thread {
         static Type fromInteger(int v) {
             return Type.values()[v - 1];
         }
+
         public static String[] toArray() {
             return Arrays.stream(Type.values()).map(Type::name).toArray(String[]::new);
         }
@@ -28,6 +29,7 @@ public class Device extends Thread {
     private final Type type;
     private final Router router;
     private final ProgressKeeper prg;
+    private int port;
 
     /**
      * Constructs a new device with given name and type. The online time for the device is initialized randomly between minTimeout and maxTimeout
@@ -61,7 +63,7 @@ public class Device extends Thread {
 
     private void doOnlineWork() {
         workTimeStamp = Network.getTimeStampFormatted();
-        Network.myGUI.logInConsole(this + " performs online activity");
+        Network.myGUI.logInConsole(this + " performs online activity on port " + getPort());
         try {
             if (prg == null) {
                 Thread.sleep(timeout);
@@ -87,12 +89,21 @@ public class Device extends Thread {
     }
 
     private String[] serialize() {
-        return new String[]{name, type.toString(), connectTimeStamp, workTimeStamp, logoutTimeStamp};
+        return new String[]{name, type.toString(), String.valueOf(port), connectTimeStamp, workTimeStamp, logoutTimeStamp};
     }
 
-    int getID(){
+    int getID() {
         return id;
     }
+
+    void setPort(int p) {
+        port = p;
+    }
+
+    int getPort() {
+        return port;
+    }
+
     @Override
     public void run() {
         connectToRouter();

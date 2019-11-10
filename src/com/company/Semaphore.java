@@ -7,6 +7,10 @@ public class Semaphore {
         value = initial;
     }
 
+    public boolean mustWait() {
+        return (value >= 0);
+    }
+
     public synchronized void acquire() {
         value--;
         if (value < 0) {
@@ -20,7 +24,6 @@ public class Semaphore {
     public synchronized void release() {
         value++;
         if (value <= 0) notify();
-        System.out.println(value);
     }
 
 }

@@ -57,7 +57,7 @@ public class Network {
         }
     }
 
-    public static synchronized void endSimulation() {
+    public static  void endSimulation() {
         inSimulation = false;
         deviceQueue.removeAllElements();
         router.forceStopWork();

@@ -43,7 +43,7 @@ public class GUI {
         Timer tmTime = new Timer(50, e -> lblTime.setText(Network.getTimeStampFormatted()));
         tmTime.start();
 
-        modelTable = new DefaultTableModel(null, new String[]{"Name", "Type", "Arrive Time", "Start Time", "Leave Time"});
+        modelTable = new DefaultTableModel(null, new String[]{"Name", "Type", "Port" ,"Arrive Time", "Start Time", "Leave Time"});
         tblLog.setModel(modelTable);
 
         SpinnerNumberModel modelSpinner;
