@@ -75,7 +75,7 @@ public class Device extends Thread {
                 prg.setValue(100);
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 

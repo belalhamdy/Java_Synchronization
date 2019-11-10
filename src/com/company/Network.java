@@ -49,7 +49,7 @@ public class Network {
         myGUI = new GUI();
     }
 
-    public static void startSimulation(int connections) {
+    public static synchronized void startSimulation(int connections) {
         inSimulation = true;
         router.setMaxConnections(connections);
         for (Device curr : deviceQueue) {
@@ -57,7 +57,7 @@ public class Network {
         }
     }
 
-    public static void endSimulation() {
+    public static synchronized void endSimulation() {
         inSimulation = false;
         deviceQueue.removeAllElements();
         router.forceStopWork();
