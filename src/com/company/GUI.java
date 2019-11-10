@@ -23,7 +23,6 @@ public class GUI {
     private JSpinner spnCapacity;
     private JButton btnSimManager;
 
-    private Timer tmTime;
     private DefaultTableModel modelTable;
 
     public static void main(String[] args) {
@@ -33,11 +32,9 @@ public class GUI {
         }
 
         Network.myGUI = new GUI();
-
-
     }
 
-    public GUI() {
+    private GUI() {
         JFrame form = new JFrame("Network Simulation");
         form.setResizable(false);
 
@@ -48,7 +45,7 @@ public class GUI {
 
         pnlProgressBar.setLayout(new BoxLayout(pnlProgressBar, BoxLayout.Y_AXIS));
 
-        tmTime = new Timer(50, e -> lblTime.setText(Network.getTimeStampFormatted()));
+        Timer tmTime = new Timer(50, e -> lblTime.setText(Network.getTimeStampFormatted()));
         tmTime.start();
 
         modelTable = new DefaultTableModel(null, new String[]{"Name", "Type", "Arrive Time", "Start Time", "Leave Time"});
@@ -101,7 +98,7 @@ public class GUI {
         updateQueue(Network.getDeviceQueue());
     }
 
-    public void startSimulation(int connections) throws Exception {
+    private void startSimulation(int connections) throws Exception {
         Network.startSimulation(connections);
         btnSimManager.setText("End Simulation");
         txtLog.setText("");
@@ -113,7 +110,7 @@ public class GUI {
         modelTable.fireTableDataChanged();
     }
 
-    public void endSimulation() {
+    private void endSimulation() {
         btnSimManager.setText("Start Simulation");
         Network.clearData();
         updateQueue(Network.getDeviceQueue());

@@ -1,6 +1,9 @@
 package com.company;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Random;
+import java.util.stream.Stream;
 
 public class Device extends Thread {
     public int id;
@@ -14,9 +17,8 @@ public class Device extends Thread {
         static Type fromInteger(int v) {
             return Type.values()[v - 1];
         }
-
         public static String[] toArray() {
-            return new String[]{"Android", "PC", "Tablet", "TV", "IPhone", "Laptop", "Other"};
+            return Arrays.stream(Type.values()).map(Type::name).toArray(String[]::new);
         }
 
         public String toString() {
