@@ -130,7 +130,7 @@ public class GUI {
 
     }
 
-    public void updateQueue(Vector<Device> curr) {
+    public synchronized void updateQueue(Vector<Device> curr) {
         if (curr != null) {
             lstInQueue.setListData(curr);
         } else {
