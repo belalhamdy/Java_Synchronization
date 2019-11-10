@@ -3,8 +3,6 @@ package com.company;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Vector;
 
 import static javax.swing.JOptionPane.showMessageDialog;
@@ -26,7 +24,7 @@ public class GUI {
     private JButton btnSimManager;
 
     private Timer tmTime;
-    private DefaultTableModel dtm;
+    private DefaultTableModel modelTable;
 
     public static void main(String[] args) {
         try {
@@ -53,61 +51,66 @@ public class GUI {
         tmTime = new Timer(50, e -> lblTime.setText(Network.getTimeStampFormatted()));
         tmTime.start();
 
-        dtm = new DefaultTableModel(null, new String[]{"Name", "Type", "Arrive Time", "Start Time", "Leave Time"});
-        tblLog.setModel(dtm);
+        modelTable = new DefaultTableModel(null, new String[]{"Name", "Type", "Arrive Time", "Start Time", "Leave Time"});
+        tblLog.setModel(modelTable);
 
-        ((SpinnerNumberModel) this.spnTime.getModel()).setMinimum(0);
-        this.spnCapacity.getModel().setValue(1);
-        ((SpinnerNumberModel) this.spnCapacity.getModel()).setMinimum(1);
+        SpinnerNumberModel modelSpinner;
+        //Set up spnCapacity
+        modelSpinner = (SpinnerNumberModel) spnCapacity.getModel();
+        modelSpinner.setMinimum(1);
+        modelSpinner.setValue(1);
+        //Set up spnTime
+        modelSpinner = (SpinnerNumberModel) spnTime.getModel();
+        modelSpinner.setMinimum(0);
+        modelSpinner.setStepSize(100);
 
         cmbType.setModel(new DefaultComboBoxModel<>(Device.Type.toArray()));
 
-        btnEnqueue.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String name = txtName.getText();
-                if (name.equals("")) {
-                    showMessageDialog(null, "Name can't be empty");
-                    return;
-                }
-                if (name.length()>25){
-                    showMessageDialog(null, "Name is too large");
-                    txtName.setText("");
-                    return;
-                }
-                int type = cmbType.getSelectedIndex() + 1;
-                int time = (Integer) spnTime.getValue();
-                Network.addDevice(name, type, time);
-                updateQueue(Network.getDeviceQueue());
+        //Action Listeners for buttons.
+        btnEnqueue.addActionListener(e -> btnEnqueue_clicked());
+        btnSimManager.addActionListener(e -> btnSimManager_clicked());
+    }
+
+    private void btnSimManager_clicked() {
+        if (btnSimManager.getText().equals("Start Simulation")) {
+            try {
+                startSimulation((Integer) spnCapacity.getValue());
+            } catch (Exception ex) {
+                showMessageDialog(null, ex.getMessage());
+                ex.printStackTrace();
             }
-        });
-        btnSimManager.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if(btnSimManager.getText().equals("Start Simulation")){
-                    try {
-                        startSimulation((Integer) spnCapacity.getValue());
-                    } catch (Exception ex) {
-                        showMessageDialog(null, ex.getMessage());
-                        ex.printStackTrace();
-                    }
-                }
-                else
-                {
-                    endSimulation();
-                }
-            }
-        });
+        } else {
+            endSimulation();
+        }
+    }
+
+    private void btnEnqueue_clicked() {
+        String name = txtName.getText();
+        if (name.equals("")) {
+            showMessageDialog(null, "Name can't be empty");
+            return;
+        }
+        if (name.length() > 25) {
+            showMessageDialog(null, "Name is too large");
+            txtName.selectAll();
+            return;
+        }
+        int type = cmbType.getSelectedIndex() + 1;
+        int time = (int) spnTime.getValue();
+        Network.addDevice(name, type, time);
+        updateQueue(Network.getDeviceQueue());
     }
 
     public void startSimulation(int connections) throws Exception {
         Network.startSimulation(connections);
         btnSimManager.setText("End Simulation");
         txtLog.setText("");
+
         this.pnlProgressBar.removeAll();
         this.pnlProgressBar.revalidate();
-        dtm = new DefaultTableModel(null, new String[]{"Name", "Type", "Arrive Time", "Start Time", "Leave Time"});
-        tblLog.setModel(dtm);
+
+        modelTable.getDataVector().removeAllElements();
+        modelTable.fireTableDataChanged();
     }
 
     public void endSimulation() {
@@ -126,7 +129,7 @@ public class GUI {
     }
 
     public void log(String[] data) {
-        dtm.addRow(data);
+        modelTable.addRow(data);
     }
 
 
@@ -135,13 +138,13 @@ public class GUI {
     }
 
 
-    static class ProgressManager {
+    public static class ProgressManager implements Device.ProgressKeeper {
         private final JPanel panelArea;
         private final JPanel panel;
         private final JProgressBar progressBar;
         private final JLabel label;
 
-        ProgressManager(JPanel panelArea, String Title) {
+        private ProgressManager(JPanel panelArea, String Title) {
             this.panelArea = panelArea;
             this.panel = new JPanel();
             this.panel.setLayout(new BoxLayout(this.panel, BoxLayout.X_AXIS));
@@ -171,14 +174,16 @@ public class GUI {
             panelArea.revalidate();
         }
 
-        void setValue(int v) {
+        public void setValue(int v) {
             this.progressBar.setValue(v);
         }
 
+        /*
         void destroy() {
             panelArea.remove(this.panel);
             this.panel.removeAll();
             panelArea.revalidate();
         }
+        */
     }
 }

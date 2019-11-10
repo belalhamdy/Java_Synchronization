@@ -1,12 +1,11 @@
 package com.company;
 
-import javax.swing.*;
 import java.util.Random;
 
 public class Device extends Thread {
-    public static final int maxTimeout = 10000, minTimeout = 3000;
-    int timeout;
     public int id;
+    private static final int maxTimeout = 10000, minTimeout = 3000;
+    private int timeout;
     private String connectTimeStamp, workTimeStamp, logoutTimeStamp;
 
     public enum Type {
@@ -28,19 +27,19 @@ public class Device extends Thread {
     private final String name;
     private final Type type;
     private final Router router;
-    private final GUI.ProgressManager prg;
+    private final ProgressKeeper prg;
 
     /**
      * Constructs a new device with given name and type. The online time for the device is initialized randomly between minTimeout and maxTimeout
      */
-    Device(Router router, String name, Type type, GUI.ProgressManager prg) {
+    Device(Router router, String name, Type type, ProgressKeeper prg) {
         this(router, name, type, prg, new Random().nextInt(maxTimeout - minTimeout + 1) + minTimeout);
     }
 
     /**
      * Constructs a new device with given name and type. The online time for the device is initialized with timeout
      */
-    Device(Router router, String name, Type type, GUI.ProgressManager prg, int timeout) {
+    Device(Router router, String name, Type type, ProgressKeeper prg, int timeout) {
         this.router = router;
         this.name = name;
         this.type = type;
@@ -89,7 +88,7 @@ public class Device extends Thread {
         router.removeDevice(this);
     }
 
-    public String[] serialize() {
+    private String[] serialize() {
         return new String[]{name, type.toString(), connectTimeStamp, workTimeStamp, logoutTimeStamp};
     }
 
@@ -100,5 +99,9 @@ public class Device extends Thread {
         doOnlineWork();
         logout();
         Network.myGUI.log(serialize());
+    }
+
+    public interface ProgressKeeper {
+        void setValue(int v);
     }
 }
