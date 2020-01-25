@@ -1,4 +1,4 @@
 # Java_Synchronization
-Simulation of a router that has maximum devices to connect to it and waiting list using semaphore principle.
+Simulation of a router that has maximum devices to connect to it and waiting list using Semaphore principle.
 
-![Java Syncronization](Network%20Simulation.png)
+<img src = "Network Simulation.png">
